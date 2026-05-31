@@ -371,8 +371,6 @@ function selectTrustWallet() {
   else { window.location.href = "https://link.trustwallet.com/open_url?coin_id=966&url=" + encodeURIComponent(window.location.href); }
 }
 document.getElementById('connectBtn').onclick = function() {
-  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent) && !window.ethereum) {
-    document.getElementById('wallet-modal').classList.add('show');
-  } else { connectWallet(); }
+  document.getElementById('wallet-modal').classList.add('show');
 }
 </script>
