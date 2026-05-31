@@ -97,7 +97,7 @@
     </div>
     <div class="card-body">
       <button class="btn-metamask" id="connectBtn" onclick="connectWallet()">
-        🦊 Подключить MetaMask
+        🔗 Подключить кошелёк
       </button>
       <div class="wallet-info" id="walletInfo"></div>
     </div>
@@ -271,6 +271,12 @@ async function encryptRecipient(recipient) {
 }
 
 async function connectWallet() {
+  if (!window.ethereum && /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+    const choice = confirm("Выберите кошелёк:\nОК = MetaMask\nОтмена = Trust Wallet");
+    if (choice) { window.location.href = "https://metamask.app.link/dapp/" + window.location.hostname + window.location.pathname; }
+    else { window.location.href = "https://link.trustwallet.com/open_url?coin_id=966&url=" + encodeURIComponent(window.location.href); }
+    return;
+  }
   if (!window.ethereum) { alert('Установите MetaMask!'); return; }
   try {
     setStatus('Подключаем...');
