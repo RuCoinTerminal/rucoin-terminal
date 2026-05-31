@@ -5,64 +5,94 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RuCoin Private</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<script type="module">
+  import { createWeb3Modal, defaultConfig } from 'https://esm.sh/@web3modal/ethers@4.2.3'
+  
+  const projectId = '6f42474b069a84abfa7fb24f69101e7e'
+  
+  const polygon = {
+    chainId: 137,
+    name: 'Polygon',
+    currency: 'POL',
+    explorerUrl: 'https://polygonscan.com',
+    rpcUrl: 'https://polygon-rpc.com'
+  }
+
+  const metadata = {
+    name: 'RuCoin Terminal',
+    description: 'Anonymous payments on Polygon',
+    url: 'https://rucointerminal.github.io',
+    icons: []
+  }
+
+  const modal = createWeb3Modal({
+    ethersConfig: defaultConfig({ metadata }),
+    chains: [polygon],
+    projectId
+  })
+
+  window.web3modal = modal
+</script>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #fff; min-height: 100vh; }
-  .navbar { background: #141414; border-bottom: 1px solid #2a2a2a; padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .navbar { background: #141414; border-bottom: 1px solid #2a2a2a; padding: 0 20px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
   .nav-logo { display: flex; align-items: center; gap: 12px; }
   .nav-name { font-size: 18px; font-weight: 700; color: #26a17b; letter-spacing: 1px; }
   .nav-badge { background: rgba(38,161,123,0.15); border: 1px solid rgba(38,161,123,0.3); color: #26a17b; font-size: 11px; padding: 4px 10px; border-radius: 4px; }
   .nav-right { display: flex; align-items: center; gap: 12px; }
   .btn-trade { background: rgba(38,161,123,0.15); border: 1px solid rgba(38,161,123,0.3); color: #26a17b; font-size: 12px; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-weight: 600; transition: all 0.2s; }
   .btn-trade:hover { background: rgba(38,161,123,0.3); }
-  .main { max-width: 560px; margin: 60px auto; padding: 0 20px; }
-  .page-title { text-align: center; margin-bottom: 40px; }
-  .page-title h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+  .main { max-width: 560px; margin: 40px auto; padding: 0 20px; }
+  .page-title { text-align: center; margin-bottom: 32px; }
+  .page-title h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
   .page-title h1 span { color: #26a17b; }
   .page-title p { font-size: 14px; color: #666; }
   .card { background: #141414; border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
-  .card-header { padding: 20px 24px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; }
-  .card-header-title { font-size: 13px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; }
+  .card-header { padding: 16px 24px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; }
+  .card-header-title { font-size: 12px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; }
   .card-header-badge { font-size: 11px; color: #26a17b; background: rgba(38,161,123,0.1); padding: 3px 8px; border-radius: 4px; }
-  .card-body { padding: 24px; }
-  .btn-metamask { width: 100%; padding: 14px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-metamask:hover { background: #2dd4a0; transform: translateY(-1px); }
-  .btn-metamask:disabled { background: #1a5040; cursor: not-allowed; transform: none; }
+  .card-body { padding: 20px; }
+  .btn-connect { width: 100%; padding: 14px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-connect:hover { background: #2dd4a0; }
+  .btn-connect:disabled { background: #1a5040; cursor: not-allowed; }
   .wallet-info { display: none; margin-top: 12px; padding: 12px 16px; background: rgba(38,161,123,0.08); border: 1px solid rgba(38,161,123,0.2); border-radius: 8px; font-size: 12px; color: #26a17b; font-family: monospace; }
   .form { display: none; }
-  .field { margin-bottom: 20px; }
-  .field-label { font-size: 12px; font-weight: 600; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: block; }
-  input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 13px 16px; color: #fff; font-size: 14px; outline: none; transition: all 0.2s; font-family: inherit; }
+  .field { margin-bottom: 16px; }
+  .field-label { font-size: 11px; font-weight: 600; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: block; }
+  input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 12px 16px; color: #fff; font-size: 14px; outline: none; transition: all 0.2s; font-family: inherit; }
   input:focus { border-color: #26a17b; }
-  .warning-box { background: rgba(255,165,0,0.08); border: 1px solid rgba(255,165,0,0.3); border-radius: 8px; padding: 12px 16px; margin-top: 8px; font-size: 12px; color: #ffa500; line-height: 1.5; }
-  .warning-box strong { display: block; margin-bottom: 4px; }
+  .warning-box { background: rgba(255,165,0,0.08); border: 1px solid rgba(255,165,0,0.3); border-radius: 8px; padding: 10px 14px; margin-top: 8px; font-size: 11px; color: #ffa500; line-height: 1.5; }
   .amounts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .amount-btn { padding: 14px 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; font-family: inherit; position: relative; }
+  .amount-btn { padding: 12px 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; font-family: inherit; }
   .amount-btn:hover:not(:disabled) { border-color: #26a17b; color: #26a17b; }
   .amount-btn.active { background: rgba(38,161,123,0.1); border-color: #26a17b; color: #26a17b; }
   .amount-btn:disabled { background: #111; border-color: #222; color: #333; cursor: not-allowed; }
-  .amount-btn:disabled::after { content: 'Нет средств'; display: block; font-size: 9px; color: #444; margin-top: 3px; font-weight: 400; }
+  .amount-btn:disabled::after { content: 'Нет средств'; display: block; font-size: 9px; color: #444; margin-top: 2px; font-weight: 400; }
   .amount-sub { font-size: 10px; color: #555; margin-top: 2px; }
   .amount-btn.active .amount-sub { color: #26a17b; opacity: 0.7; }
-  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; }
+  .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #222; font-size: 13px; }
   .info-row:last-child { border-bottom: none; }
   .info-row-label { color: #666; }
   .info-row-value { color: #26a17b; font-weight: 500; }
-  .btn-send { width: 100%; padding: 15px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-  .btn-send:hover { background: #2dd4a0; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(38,161,123,0.3); }
+  .btn-send { width: 100%; padding: 15px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; margin-top: 4px; }
+  .btn-send:hover { background: #2dd4a0; transform: translateY(-1px); }
   .btn-send:disabled { background: #1a5040; cursor: not-allowed; transform: none; }
   .success { display: none; margin-top: 16px; padding: 20px; background: rgba(38,161,123,0.08); border: 1px solid rgba(38,161,123,0.25); border-radius: 8px; text-align: center; }
   .success-icon { width: 48px; height: 48px; background: #26a17b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px; }
   .success h3 { font-size: 16px; color: #26a17b; margin-bottom: 6px; }
   .success p { font-size: 13px; color: #666; line-height: 1.6; }
   .tx-link { font-size: 11px; color: #26a17b; font-family: monospace; word-break: break-all; margin-top: 8px; opacity: 0.7; display: block; }
-  .status { text-align: center; font-size: 13px; color: #555; padding: 10px 0; min-height: 36px; }
+  .status { text-align: center; font-size: 13px; color: #555; padding: 8px 0; min-height: 32px; }
+  .token-card { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between; }
+  .token-addr { font-family: monospace; font-size: 11px; color: #26a17b; word-break: break-all; flex: 1; margin-right: 10px; }
+  .copy-btn { background: #26a17b; border: none; border-radius: 6px; color: white; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: 600; white-space: nowrap; }
   .info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
-  .info-card { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; text-align: center; }
-  .info-card-icon { font-size: 20px; margin-bottom: 8px; }
+  .info-card { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 14px; text-align: center; }
+  .info-card-icon { font-size: 20px; margin-bottom: 6px; }
   .info-card-title { font-size: 11px; font-weight: 600; color: #26a17b; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
   .info-card-desc { font-size: 11px; color: #555; line-height: 1.4; }
-  footer { text-align: center; padding: 40px 20px; font-size: 12px; color: #333; letter-spacing: 1px; }
+  footer { text-align: center; padding: 32px 20px; font-size: 12px; color: #333; }
   footer span { color: #26a17b; margin: 0 4px; }
   .loading-dot { display: inline-block; width: 6px; height: 6px; background: #26a17b; border-radius: 50%; margin: 0 2px; animation: pulse 1.5s infinite; }
   .loading-dot:nth-child(2) { animation-delay: 0.3s; }
@@ -77,10 +107,7 @@
     <span class="nav-badge">PRIVATE</span>
   </div>
   <div class="nav-right">
-    <a class="btn-trade" href="https://dapp.quickswap.exchange/swap?type=best&from=0xc2132D05D31c914a87C6611C10748AEb04B58e8F&to=0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575" target="_blank">
-      💱 Купить / Продать
-    </a>
-    <span style="font-size:12px;color:#555;letter-spacing:1px;">POLYGON</span>
+    <a class="btn-trade" href="https://dapp.quickswap.exchange/swap?type=best&from=0xc2132D05D31c914a87C6611C10748AEb04B58e8F&to=0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575" target="_blank">💱 Купить / Продать</a>
   </div>
 </nav>
 
@@ -90,14 +117,19 @@
     <p>E2E Encryption • Polygon Network</p>
   </div>
 
+  <div class="token-card">
+    <span class="token-addr">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span>
+    <button class="copy-btn" onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓';setTimeout(()=>this.textContent='Copy',2000)">Copy</button>
+  </div>
+
   <div class="card">
     <div class="card-header">
       <span class="card-header-title">Кошелёк</span>
       <span class="card-header-badge">Web3</span>
     </div>
     <div class="card-body">
-      <button class="btn-metamask" id="connectBtn" onclick="connectWallet()">
-        🦊 Подключить MetaMask
+      <button class="btn-connect" id="connectBtn" onclick="connectWallet()">
+        🔗 Подключить кошелёк
       </button>
       <div class="wallet-info" id="walletInfo"></div>
     </div>
@@ -123,20 +155,15 @@
             </div>
           </div>
         </div>
-
         <div class="field">
           <label class="field-label">Адрес получателя</label>
           <input type="text" id="recipient" placeholder="0x..."/>
           <div class="warning-box">
-            <strong>⚠️ Важно!</strong>
-            Убедитесь что адрес поддерживает сеть <strong>Polygon (MATIC)</strong>.
-            Не отправляйте на биржевые адреса без поддержки токена RUS —
-            средства могут быть потеряны!
+            ⚠️ Только сеть <strong>Polygon (MATIC)</strong>. Не отправляйте на биржевые адреса без поддержки токена RUS!
           </div>
         </div>
-
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-body" style="padding:16px">
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-body" style="padding:14px">
             <div class="info-row">
               <span class="info-row-label">Протокол</span>
               <span class="info-row-value">ECDH + AES-256-GCM</span>
@@ -151,11 +178,9 @@
             </div>
           </div>
         </div>
-
         <button class="btn-send" id="sendBtn" onclick="sendPayment()">
           🔒 Отправить анонимно
         </button>
-
         <div class="success" id="successBox">
           <div class="success-icon">✓</div>
           <h3>Транзакция принята</h3>
@@ -167,7 +192,7 @@
     </div>
   </div>
 
-  <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-header-title">Адрес токена RuCoin</span><span class="card-header-badge">Polygon</span></div><div class="card-body"><div style="display:flex;align-items:center;gap:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:12px 16px"><span style="font-family:monospace;font-size:11px;color:#26a17b;flex:1;word-break:break-all">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span><button onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓';setTimeout(()=>this.textContent='Copy',2000)" style="background:#26a17b;border:none;border-radius:6px;color:white;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">Copy</button></div></div></div><div class="info-cards">
+  <div class="info-cards">
     <div class="info-card">
       <div class="info-card-icon">🔐</div>
       <div class="info-card-title">Анонимно</div>
@@ -192,7 +217,6 @@
 const POOL1_ADDRESS = "0xda3b99F97f64eA013814b3FC19BC9ce27AC1A549";
 const RUS_ADDRESS = "0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575";
 const POLYGON_CHAIN_ID = "0x89";
-
 const SERVER_PUBLIC_KEY_HEX = "041cb4242e64bc4b2663952c1543a64cfd8fcf40fae2e298085ce88e0a5cb5d27636958af51cbdff99dce8110a8844ed80b4b796d6f4e7c9a850774f1b98132747";
 
 const POOLS = {
@@ -205,36 +229,78 @@ const POOLS = {
 };
 
 const AMOUNTS = [
-  { value: "100",     label: "100",   sub: "RUS" },
-  { value: "500",     label: "500",   sub: "RUS" },
-  { value: "1000",    label: "1K",    sub: "RUS" },
-  { value: "10000",   label: "10K",   sub: "RUS" },
-  { value: "100000",  label: "100K",  sub: "RUS" },
-  { value: "1000000", label: "1M",    sub: "RUS" }
+  { value: "100", label: "100", sub: "RUS" },
+  { value: "500", label: "500", sub: "RUS" },
+  { value: "1000", label: "1K", sub: "RUS" },
+  { value: "10000", label: "10K", sub: "RUS" },
+  { value: "100000", label: "100K", sub: "RUS" },
+  { value: "1000000", label: "1M", sub: "RUS" }
 ];
 
-const POOL1_ABI = [
-  "function deposit(address _token, uint256 _amount, bytes32 _commitment, bytes calldata _encryptedRecipient) external"
-];
-const ERC20_ABI = [
-  "function approve(address spender, uint256 amount) external returns (bool)",
-  "function decimals() external view returns (uint8)"
-];
-const POOL2_ABI = [
-  "function getBalance() external view returns (uint256)"
-];
+const POOL1_ABI = ["function deposit(address _token, uint256 _amount, bytes32 _commitment, bytes calldata _encryptedRecipient) external"];
+const ERC20_ABI = ["function approve(address spender, uint256 amount) external returns (bool)", "function decimals() external view returns (uint8)"];
+const POOL2_ABI = ["function getBalance() external view returns (uint256)"];
 
 let provider, signer, selectedAmount = null;
+
+async function connectWallet() {
+  try {
+    setStatus('Подключаем...');
+    
+    if (window.web3modal) {
+      await window.web3modal.open();
+      
+      window.web3modal.subscribeProvider(async ({ provider: p, address, isConnected }) => {
+        if (isConnected && p && address) {
+          provider = new ethers.BrowserProvider(p);
+          signer = await provider.getSigner();
+          
+          const network = await provider.getNetwork();
+          if (network.chainId !== 137n) {
+            try {
+              await p.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x89' }] });
+              provider = new ethers.BrowserProvider(p);
+              signer = await provider.getSigner();
+            } catch(e) {}
+          }
+          
+          document.getElementById('walletInfo').style.display = 'block';
+          document.getElementById('walletInfo').textContent = '● ' + address.slice(0,8) + '...' + address.slice(-6) + ' (Polygon)';
+          document.getElementById('form').style.display = 'block';
+          document.getElementById('formPlaceholder').style.display = 'none';
+          document.getElementById('connectBtn').textContent = '✓ Подключено';
+          document.getElementById('connectBtn').disabled = true;
+          setStatus('Проверяем балансы...');
+          await checkPoolBalances();
+          setStatus('');
+        }
+      });
+    } else if (window.ethereum) {
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = await provider.getSigner();
+      const addr = await signer.getAddress();
+      document.getElementById('walletInfo').style.display = 'block';
+      document.getElementById('walletInfo').textContent = '● ' + addr.slice(0,8) + '...' + addr.slice(-6) + ' (Polygon)';
+      document.getElementById('form').style.display = 'block';
+      document.getElementById('formPlaceholder').style.display = 'none';
+      document.getElementById('connectBtn').textContent = '✓ Подключено';
+      document.getElementById('connectBtn').disabled = true;
+      setStatus('Проверяем балансы...');
+      await checkPoolBalances();
+      setStatus('');
+    }
+  } catch(e) { setStatus('Ошибка: ' + e.message); }
+}
 
 async function checkPoolBalances() {
   if (!provider) return;
   const grid = document.getElementById('amounts');
   grid.innerHTML = '';
   for (const a of AMOUNTS) {
-    const pool2Address = POOLS[a.value];
     let hasBalance = false;
     try {
-      const pool2 = new ethers.Contract(pool2Address, POOL2_ABI, provider);
+      const pool2 = new ethers.Contract(POOLS[a.value], POOL2_ABI, provider);
       const balance = await pool2.getBalance();
       hasBalance = balance >= ethers.parseEther(a.value);
     } catch(e) {}
@@ -268,34 +334,6 @@ async function encryptRecipient(recipient) {
   result.set(iv, 65);
   result.set(new Uint8Array(encrypted), 77);
   return '0x' + Array.from(result).map(b => b.toString(16).padStart(2,'0')).join('');
-}
-
-async function connectWallet() {
-  if (!window.ethereum) { alert('Установите MetaMask!'); return; }
-  try {
-    setStatus('Подключаем...');
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-    if (chainId !== POLYGON_CHAIN_ID) {
-      try {
-        await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_CHAIN_ID }] });
-      } catch(e) {
-        await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{ chainId: POLYGON_CHAIN_ID, chainName: 'Polygon Mainnet', nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 }, rpcUrls: ['https://polygon-rpc.com'], blockExplorerUrls: ['https://polygonscan.com'] }] });
-      }
-    }
-    provider = new ethers.BrowserProvider(window.ethereum);
-    signer = await provider.getSigner();
-    const addr = await signer.getAddress();
-    document.getElementById('walletInfo').style.display = 'block';
-    document.getElementById('walletInfo').textContent = '● ' + addr.slice(0,8) + '...' + addr.slice(-6) + ' (Polygon)';
-    document.getElementById('form').style.display = 'block';
-    document.getElementById('formPlaceholder').style.display = 'none';
-    document.getElementById('connectBtn').textContent = '✓ Подключено';
-    document.getElementById('connectBtn').disabled = true;
-    setStatus('Проверяем балансы пулов...');
-    await checkPoolBalances();
-    setStatus('');
-  } catch(e) { setStatus('Ошибка: ' + e.message); }
 }
 
 async function sendPayment() {
