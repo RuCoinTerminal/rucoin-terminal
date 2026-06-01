@@ -86,7 +86,7 @@
 
 <div class="main">
   <div class="page-title">
-    <h1>Анонимные <span>платежи</span></h1>
+    <h1>Приватные <span>переводы</span></h1>
     <p>E2E Encryption • Polygon Network</p>
   </div>
 
@@ -373,4 +373,89 @@ function selectTrustWallet() {
 document.getElementById('connectBtn').onclick = function() {
   document.getElementById('wallet-modal').classList.add('show');
 }
+</script>
+<style>
+#help-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:flex-start; overflow-y:auto; padding:20px 0; }
+#help-modal.show { display:flex; }
+.hm-box { background:#141414; border:1px solid #2a2a2a; border-radius:16px; padding:24px; width:90%; max-width:480px; margin:auto; }
+.hm-title { font-size:18px; font-weight:700; color:#26a17b; margin-bottom:20px; text-align:center; }
+.hm-section { margin-bottom:20px; }
+.hm-section-title { font-size:13px; font-weight:700; color:#26a17b; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #2a2a2a; }
+.hm-step { display:flex; gap:12px; margin-bottom:10px; align-items:flex-start; }
+.hm-step-num { background:#26a17b; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; margin-top:1px; }
+.hm-step-text { font-size:13px; color:#ccc; line-height:1.6; }
+.hm-step-text strong { color:#fff; }
+.hm-addr { font-family:monospace; font-size:11px; color:#26a17b; background:#1a1a1a; padding:8px 10px; border-radius:6px; word-break:break-all; margin-top:6px; display:block; cursor:pointer; border:1px solid #333; }
+.hm-warning { background:rgba(255,165,0,0.08); border:1px solid rgba(255,165,0,0.3); border-radius:8px; padding:12px; font-size:12px; color:#ffa500; line-height:1.6; margin-bottom:16px; }
+.hm-close { width:100%; padding:12px; border:none; border-radius:8px; background:#26a17b; color:white; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; margin-top:4px; }
+</style>
+
+<div id="help-modal">
+  <div class="hm-box">
+    <div class="hm-title">📖 Инструкция</div>
+
+    <div class="hm-section">
+      <div class="hm-section-title">Что нужно для работы</div>
+      <div class="hm-step">
+        <div class="hm-step-num">✓</div>
+        <div class="hm-step-text">Кошелёк <strong>MetaMask</strong> или <strong>Trust Wallet</strong> с сетью Polygon</div>
+      </div>
+      <div class="hm-step">
+        <div class="hm-step-num">✓</div>
+        <div class="hm-step-text">Токен <strong>RuCoin (RUS)</strong> на кошельке</div>
+      </div>
+      <div class="hm-step">
+        <div class="hm-step-num">✓</div>
+        <div class="hm-step-text">Небольшое количество <strong>POL</strong> для оплаты газа (~0.1 POL)</div>
+      </div>
+    </div>
+
+    <div class="hm-section">
+      <div class="hm-section-title">Шаг 1 — Купить RuCoin</div>
+      <div class="hm-step">
+        <div class="hm-step-num">1</div>
+        <div class="hm-step-text">Нажми кнопку <strong>"Купить / Продать"</strong> вверху страницы — откроется QuickSwap</div>
+      </div>
+      <div class="hm-step">
+        <div class="hm-step-num">2</div>
+        <div class="hm-step-text">Или зайди на <strong>quickswap.exchange</strong> и вставь адрес токена вручную:
+          <span class="hm-addr" onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓ Скопировано!';setTimeout(()=>this.textContent='0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575',2000)">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hm-section">
+      <div class="hm-section-title">Шаг 2 — Добавить RuCoin в MetaMask</div>
+      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Открой MetaMask → выбери сеть <strong>Polygon</strong></div></div>
+      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Нажми <strong>"Импорт токенов"</strong> внизу</div></div>
+      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Вставь адрес токена — MetaMask заполнит остальное автоматически</div></div>
+      <div class="hm-step"><div class="hm-step-num">4</div><div class="hm-step-text">Нажми <strong>"Импортировать"</strong></div></div>
+    </div>
+
+    <div class="hm-section">
+      <div class="hm-section-title">Шаг 3 — Добавить RuCoin в Trust Wallet</div>
+      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Открой Trust Wallet → нажми <strong>"+"</strong> вверху справа</div></div>
+      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">В строке поиска вставь адрес токена</div></div>
+      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Найди <strong>RuCoin (RUS)</strong> в сети Polygon и включи его</div></div>
+    </div>
+
+    <div class="hm-section">
+      <div class="hm-section-title">Шаг 4 — Отправить анонимно</div>
+      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Нажми <strong>"Подключить кошелёк"</strong></div></div>
+      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Выбери сумму перевода</div></div>
+      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Введи адрес получателя (только Polygon!)</div></div>
+      <div class="hm-step"><div class="hm-step-num">4</div><div class="hm-step-text">Нажми <strong>"Отправить анонимно"</strong> и подтверди в кошельке</div></div>
+      <div class="hm-step"><div class="hm-step-num">5</div><div class="hm-step-text">Получатель получит средства через <strong>~30 секунд</strong></div></div>
+    </div>
+
+    <div class="hm-warning">
+      ⚠️ <strong>Важно:</strong> Терминал работает только в сети <strong>Polygon</strong>. Не отправляйте на биржевые адреса без поддержки токена RUS. Комиссия сервиса составляет <strong>1%</strong> от суммы перевода.
+    </div>
+
+    <button class="hm-close" onclick="document.getElementById('help-modal').classList.remove('show')">Понятно!</button>
+  </div>
+</div>
+
+<script>
+document.querySelector('.nav-right').insertAdjacentHTML('afterbegin', '<button onclick="document.getElementById(\'help-modal\').classList.add(\'show\')" style="background:rgba(38,161,123,0.15);border:1px solid rgba(38,161,123,0.3);color:#26a17b;font-size:12px;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;margin-right:8px;">📖 Инструкция</button>');
 </script>
