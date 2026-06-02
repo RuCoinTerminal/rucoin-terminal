@@ -3,291 +3,66 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>RuCoin Private</title>
+<title>RuCoin — Купить / Продать и отправить RUS</title>
+<meta name="theme-color" content="#0b1512">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: #1a1a1a; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; color: #fff; min-height: 100vh; }
-  .navbar { background: #141414; border-bottom: 1px solid #2a2a2a; padding: 0 40px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-  .nav-logo { display: flex; align-items: center; gap: 12px; }
-  .nav-name { font-size: 18px; font-weight: 700; color: #26a17b; letter-spacing: 1px; }
-  .nav-badge { background: rgba(38,161,123,0.15); border: 1px solid rgba(38,161,123,0.3); color: #26a17b; font-size: 11px; padding: 4px 10px; border-radius: 4px; }
-  .nav-right { display: flex; align-items: center; gap: 12px; }
-  .btn-trade { background: rgba(38,161,123,0.15); border: 1px solid rgba(38,161,123,0.3); color: #26a17b; font-size: 12px; padding: 8px 16px; border-radius: 6px; cursor: pointer; text-decoration: none; font-weight: 600; transition: all 0.2s; }
-  .btn-trade:hover { background: rgba(38,161,123,0.3); }
-  .main { max-width: 560px; margin: 60px auto; padding: 0 20px; }
-  .page-title { text-align: center; margin-bottom: 40px; }
-  .page-title h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
-  .page-title h1 span { color: #26a17b; }
-  .page-title p { font-size: 14px; color: #666; }
-  .card { background: #141414; border: 1px solid #2a2a2a; border-radius: 16px; overflow: hidden; margin-bottom: 16px; }
-  .card-header { padding: 20px 24px; border-bottom: 1px solid #2a2a2a; display: flex; align-items: center; justify-content: space-between; }
-  .card-header-title { font-size: 13px; font-weight: 600; color: #888; letter-spacing: 1px; text-transform: uppercase; }
-  .card-header-badge { font-size: 11px; color: #26a17b; background: rgba(38,161,123,0.1); padding: 3px 8px; border-radius: 4px; }
-  .card-body { padding: 24px; }
-  .btn-metamask { width: 100%; padding: 14px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-  .btn-metamask:hover { background: #2dd4a0; transform: translateY(-1px); }
-  .btn-metamask:disabled { background: #1a5040; cursor: not-allowed; transform: none; }
-  .wallet-info { display: none; margin-top: 12px; padding: 12px 16px; background: rgba(38,161,123,0.08); border: 1px solid rgba(38,161,123,0.2); border-radius: 8px; font-size: 12px; color: #26a17b; font-family: monospace; }
-  .form { display: none; }
-  .field { margin-bottom: 20px; }
-  .field-label { font-size: 12px; font-weight: 600; color: #666; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; display: block; }
-  input { width: 100%; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 13px 16px; color: #fff; font-size: 14px; outline: none; transition: all 0.2s; font-family: inherit; }
-  input:focus { border-color: #26a17b; }
-  .warning-box { background: rgba(255,165,0,0.08); border: 1px solid rgba(255,165,0,0.3); border-radius: 8px; padding: 12px 16px; margin-top: 8px; font-size: 12px; color: #ffa500; line-height: 1.5; }
-  .warning-box strong { display: block; margin-bottom: 4px; }
-  .amounts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .amount-btn { padding: 14px 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 8px; color: #888; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; text-align: center; font-family: inherit; position: relative; }
-  .amount-btn:hover:not(:disabled) { border-color: #26a17b; color: #26a17b; }
-  .amount-btn.active { background: rgba(38,161,123,0.1); border-color: #26a17b; color: #26a17b; }
-  .amount-btn:disabled { background: #111; border-color: #222; color: #333; cursor: not-allowed; }
-  .amount-btn:disabled::after { content: 'Нет средств'; display: block; font-size: 9px; color: #444; margin-top: 3px; font-weight: 400; }
-  .amount-sub { font-size: 10px; color: #555; margin-top: 2px; }
-  .amount-btn.active .amount-sub { color: #26a17b; opacity: 0.7; }
-  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #222; font-size: 13px; }
-  .info-row:last-child { border-bottom: none; }
-  .info-row-label { color: #666; }
-  .info-row-value { color: #26a17b; font-weight: 500; }
-  .btn-send { width: 100%; padding: 15px; background: #26a17b; border: none; border-radius: 8px; color: white; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-  .btn-send:hover { background: #2dd4a0; transform: translateY(-1px); box-shadow: 0 4px 20px rgba(38,161,123,0.3); }
-  .btn-send:disabled { background: #1a5040; cursor: not-allowed; transform: none; }
-  .success { display: none; margin-top: 16px; padding: 20px; background: rgba(38,161,123,0.08); border: 1px solid rgba(38,161,123,0.25); border-radius: 8px; text-align: center; }
-  .success-icon { width: 48px; height: 48px; background: #26a17b; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; margin: 0 auto 12px; }
-  .success h3 { font-size: 16px; color: #26a17b; margin-bottom: 6px; }
-  .success p { font-size: 13px; color: #666; line-height: 1.6; }
-  .tx-link { font-size: 11px; color: #26a17b; font-family: monospace; word-break: break-all; margin-top: 8px; opacity: 0.7; display: block; }
-  .status { text-align: center; font-size: 13px; color: #555; padding: 10px 0; min-height: 36px; }
-  .info-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
-  .info-card { background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; text-align: center; }
-  .info-card-icon { font-size: 20px; margin-bottom: 8px; }
-  .info-card-title { font-size: 11px; font-weight: 600; color: #26a17b; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
-  .info-card-desc { font-size: 11px; color: #555; line-height: 1.4; }
-  footer { text-align: center; padding: 40px 20px; font-size: 12px; color: #333; letter-spacing: 1px; }
-  footer span { color: #26a17b; margin: 0 4px; }
-  .loading-dot { display: inline-block; width: 6px; height: 6px; background: #26a17b; border-radius: 50%; margin: 0 2px; animation: pulse 1.5s infinite; }
-  .loading-dot:nth-child(2) { animation-delay: 0.3s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.6s; }
-  @keyframes pulse { 0%,100% { opacity: 0.3; } 50% { opacity: 1; } }
+:root{--bg:#080b0a;--panel:#101412;--panel2:#141a17;--line:rgba(255,255,255,.09);--text:#f4fff9;--muted:#8d9b94;--green:#26a17b;--green2:#31d69d;--gold:#d7b66a;--danger:#ffb454;--shadow:0 24px 80px rgba(0,0,0,.45)}
+*{margin:0;padding:0;box-sizing:border-box}html,body{width:100%;max-width:100%;overflow-x:hidden}body{min-height:100vh;background:radial-gradient(circle at 15% 0%,rgba(38,161,123,.22),transparent 30%),radial-gradient(circle at 85% 10%,rgba(215,182,106,.13),transparent 28%),linear-gradient(180deg,#080b0a 0%,#0b0f0d 45%,#070908 100%);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;color:var(--text)}
+a{color:inherit}.shell{max-width:1180px;margin:0 auto;padding:0 24px}.navbar{position:sticky;top:0;z-index:50;backdrop-filter:blur(18px);background:rgba(8,11,10,.74);border-bottom:1px solid var(--line)}.nav-inner{height:76px;display:flex;align-items:center;justify-content:space-between;gap:18px}.brand{display:flex;align-items:center;gap:12px;min-width:0}.logo-mark{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,var(--green2),#137554);box-shadow:0 0 0 1px rgba(255,255,255,.13) inset,0 10px 32px rgba(38,161,123,.25);font-weight:900;font-size:23px;color:white}.brand-text{line-height:1}.brand-name{font-size:19px;font-weight:800;letter-spacing:.3px}.brand-sub{font-size:11px;color:var(--muted);letter-spacing:1.4px;text-transform:uppercase}.nav-actions{display:flex;align-items:center;gap:10px}.nav-link,.btn{border:1px solid var(--line);background:rgba(255,255,255,.045);color:var(--text);border-radius:999px;padding:10px 15px;font-size:13px;font-weight:700;text-decoration:none;cursor:pointer;font-family:inherit;white-space:nowrap;transition:.2s}.nav-link:hover,.btn:hover{border-color:rgba(38,161,123,.55);background:rgba(38,161,123,.12);transform:translateY(-1px)}.btn-primary{border-color:rgba(38,161,123,.55);background:linear-gradient(135deg,var(--green),#17835f);box-shadow:0 10px 26px rgba(38,161,123,.22)}.btn-gold{border-color:rgba(215,182,106,.35);color:#ffe6a5;background:rgba(215,182,106,.09)}.hero{padding:58px 0 34px}.hero-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:32px;align-items:center}.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(38,161,123,.25);background:rgba(38,161,123,.08);color:#b7ffdf;border-radius:999px;padding:8px 12px;font-size:12px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;margin-bottom:18px}.dot{width:8px;height:8px;border-radius:50%;background:var(--green2);box-shadow:0 0 18px var(--green2)}.hero h1{font-size:58px;line-height:.98;letter-spacing:-2px;max-width:680px}.hero h1 span{color:var(--green2)}.hero p{margin-top:18px;max-width:560px;color:#aab8b0;font-size:17px;line-height:1.65}.hero-actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px;max-width:650px}.stat{border:1px solid var(--line);background:rgba(255,255,255,.04);border-radius:18px;padding:16px}.stat b{display:block;font-size:22px;color:#fff}.stat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}.terminal{background:linear-gradient(180deg,rgba(20,26,23,.92),rgba(13,17,15,.95));border:1px solid rgba(255,255,255,.11);border-radius:28px;box-shadow:var(--shadow);overflow:hidden}.terminal-top{height:52px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 18px;color:var(--muted);font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase}.live{color:#b7ffdf}.terminal-body{padding:22px}.card{background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:20px;overflow:hidden;margin-bottom:14px}.card-header{padding:17px 18px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.card-header-title{font-size:12px;font-weight:900;color:#dbe8e1;letter-spacing:1.2px;text-transform:uppercase}.card-header-badge{font-size:11px;color:#b7ffdf;background:rgba(38,161,123,.12);border:1px solid rgba(38,161,123,.22);padding:5px 9px;border-radius:999px}.card-body{padding:18px}.btn-metamask,.btn-send{width:100%;padding:15px;border:none;border-radius:14px;color:white;font-size:15px;font-weight:900;cursor:pointer;transition:.2s;font-family:inherit;background:linear-gradient(135deg,var(--green),#15805d);box-shadow:0 12px 28px rgba(38,161,123,.22)}.btn-metamask:hover,.btn-send:hover{transform:translateY(-1px);box-shadow:0 16px 34px rgba(38,161,123,.29)}.btn-metamask:disabled,.btn-send:disabled{opacity:.65;cursor:not-allowed;transform:none}.wallet-info{display:none;margin-top:12px;padding:12px 14px;background:rgba(38,161,123,.08);border:1px solid rgba(38,161,123,.22);border-radius:12px;font-size:12px;color:#b7ffdf;font-family:monospace}.form{display:none}.field{margin-bottom:18px}.field-label{font-size:11px;font-weight:900;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;display:block}input{width:100%;background:rgba(0,0,0,.23);border:1px solid rgba(255,255,255,.11);border-radius:13px;padding:14px 15px;color:#fff;font-size:14px;outline:none;font-family:inherit}input:focus{border-color:var(--green);box-shadow:0 0 0 4px rgba(38,161,123,.1)}.amounts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.amount-btn{padding:13px 8px;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.11);border-radius:13px;color:#dbe8e1;font-size:13px;font-weight:900;cursor:pointer;transition:.2s;text-align:center;font-family:inherit}.amount-btn:hover:not(:disabled),.amount-btn.active{border-color:var(--green);background:rgba(38,161,123,.1);color:#b7ffdf}.amount-btn:disabled{opacity:.35;cursor:not-allowed}.amount-btn:disabled::after{content:'Нет средств';display:block;font-size:9px;margin-top:3px;font-weight:600}.amount-sub{font-size:10px;color:var(--muted);margin-top:2px}.info-row{display:flex;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:13px}.info-row:last-child{border-bottom:none}.info-row-label{color:var(--muted)}.info-row-value{color:#b7ffdf;font-weight:800;text-align:right}.warning-box{background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.25);border-radius:13px;padding:12px 14px;margin-top:8px;font-size:12px;color:#ffd194;line-height:1.55}.success{display:none;margin-top:14px;padding:18px;background:rgba(38,161,123,.08);border:1px solid rgba(38,161,123,.25);border-radius:14px;text-align:center}.success-icon{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--green);margin:0 auto 10px;font-weight:900}.success h3{font-size:16px;color:#b7ffdf;margin-bottom:5px}.success p{font-size:13px;color:var(--muted);line-height:1.5}.tx-link{font-size:11px;color:#b7ffdf;font-family:monospace;word-break:break-all;margin-top:8px;display:block}.status{text-align:center;font-size:13px;color:var(--muted);padding:8px 0;min-height:32px}.trust-section{padding:28px 0 54px}.section-title{text-align:center;margin-bottom:22px}.section-title h2{font-size:32px;letter-spacing:-.8px}.section-title p{color:var(--muted);margin-top:8px}.trust-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.trust-card{background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:22px;padding:20px;min-height:145px}.trust-icon{font-size:24px;margin-bottom:12px}.trust-card h3{font-size:15px;margin-bottom:8px}.trust-card p{font-size:13px;line-height:1.55;color:var(--muted)}.token-card{margin-top:16px;display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:18px;padding:14px}.token-address{flex:1;font-family:monospace;font-size:12px;color:#b7ffdf;word-break:break-all}.mini-btn{border:1px solid rgba(38,161,123,.35);background:rgba(38,161,123,.12);color:#b7ffdf;border-radius:12px;padding:9px 11px;font-size:12px;font-weight:900;cursor:pointer;white-space:nowrap}.loading-dot{display:inline-block;width:6px;height:6px;background:var(--green2);border-radius:50%;margin:0 2px;animation:pulse 1.5s infinite}.loading-dot:nth-child(2){animation-delay:.3s}.loading-dot:nth-child(3){animation-delay:.6s}@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+.modal{display:none;position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.78);backdrop-filter:blur(12px);justify-content:center;align-items:center;padding:20px}.modal.show{display:flex}.modal-box{width:min(440px,100%);max-height:88vh;overflow:auto;background:#101412;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:var(--shadow)}.modal-title{text-align:center;color:#fff;font-size:18px;font-weight:900;margin-bottom:16px}.wm-btn{width:100%;display:flex;align-items:center;gap:12px;padding:15px;margin-bottom:10px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.04);color:#fff;font-size:15px;font-weight:800;cursor:pointer;text-align:left}.wm-btn:hover{border-color:var(--green)}.wm-close,.hm-close{width:100%;padding:12px;border:none;border-radius:13px;background:rgba(255,255,255,.08);color:#aab8b0;font-weight:800;cursor:pointer}.hm-title{font-size:20px;font-weight:900;color:#b7ffdf;margin-bottom:16px;text-align:center}.hm-section{margin-bottom:18px}.hm-section-title{font-size:12px;font-weight:900;color:#b7ffdf;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}.hm-step{display:flex;gap:10px;margin-bottom:9px}.hm-step-num{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--green);font-size:12px;font-weight:900;flex:0 0 auto}.hm-step-text{font-size:13px;color:#c4d0ca;line-height:1.55}.hm-addr{font-family:monospace;font-size:11px;color:#b7ffdf;background:rgba(0,0,0,.22);padding:8px;border-radius:8px;word-break:break-all;margin-top:6px;display:block}.hm-warning{background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.25);border-radius:13px;padding:12px;font-size:12px;color:#ffd194;line-height:1.55;margin:12px 0}footer{border-top:1px solid var(--line);padding:28px 0;color:#5f6b65;font-size:12px;text-align:center;letter-spacing:1px}
+@media(max-width:900px){.hero-grid{grid-template-columns:1fr}.hero h1{font-size:45px}.trust-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:620px){.shell{padding:0 14px}.nav-inner{height:auto;min-height:62px;padding:10px 0}.logo-mark{width:34px;height:34px;font-size:18px}.brand-name{font-size:16px}.brand-sub{display:none}.nav-actions{gap:5px}.nav-link,.btn{font-size:10px;padding:8px 9px}.hide-mobile{display:none}.hero{padding:34px 0 22px}.eyebrow{font-size:10px}.hero h1{font-size:34px;letter-spacing:-1px}.hero p{font-size:14px}.hero-actions .btn{font-size:12px;padding:11px 13px}.stats{grid-template-columns:1fr 1fr;gap:9px}.stat{padding:13px}.stat b{font-size:18px}.terminal{border-radius:22px}.terminal-body{padding:14px}.card-body{padding:15px}.card-header{padding:15px}.trust-grid{grid-template-columns:1fr}.section-title h2{font-size:26px}.amounts-grid{grid-template-columns:repeat(2,1fr)}.token-card{align-items:stretch;flex-direction:column}.mini-btn{width:100%}.modal{padding:12px}.modal-box{border-radius:20px;padding:18px}}
 
-
-  /* Mobile fix: keeps desktop unchanged, makes phone width fit screen */
-  html, body {
-    width: 100%;
-    max-width: 100%;
-    overflow-x: hidden;
-  }
-
-  img, video, canvas, svg {
-    max-width: 100%;
-  }
-
-  @media (max-width: 600px) {
-    .navbar {
-      width: 100%;
-      max-width: 100vw;
-      height: 58px;
-      padding: 0 10px;
-      gap: 6px;
-      justify-content: flex-start;
-      overflow: hidden;
-    }
-
-    .nav-logo {
-      gap: 7px;
-      flex: 0 0 auto;
-      min-width: 0;
-    }
-
-    .nav-name {
-      font-size: 15px;
-      letter-spacing: 0.5px;
-      white-space: nowrap;
-    }
-
-    .nav-badge {
-      font-size: 8.5px;
-      padding: 3px 5px;
-      border-radius: 4px;
-      white-space: nowrap;
-    }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      flex: 1 1 auto;
-      min-width: 0;
-      justify-content: flex-end;
-      overflow: hidden;
-    }
-
-    .nav-right button,
-    .btn-trade {
-      font-size: 9px !important;
-      line-height: 1.15 !important;
-      padding: 6px 6px !important;
-      border-radius: 5px !important;
-      margin-right: 0 !important;
-      white-space: nowrap !important;
-      flex: 0 1 auto;
-      min-width: 0;
-      max-width: 110px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .btn-trade {
-      max-width: 108px;
-      text-align: center;
-    }
-
-    .nav-right span {
-      display: none !important;
-    }
-
-    .main {
-      width: 100%;
-      max-width: 100%;
-      margin: 42px auto 0;
-      padding: 0 14px;
-    }
-
-    .page-title h1 {
-      font-size: 30px;
-      line-height: 1.15;
-    }
-
-    .card-header,
-    .card-body {
-      padding-left: 18px;
-      padding-right: 18px;
-    }
-
-    .info-cards {
-      grid-template-columns: 1fr;
-    }
-  }
+.trust-grid-mobile3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:620px){
+.trust-grid-mobile3{grid-template-columns:1fr !important;}
+}
 
 </style>
 </head>
 <body>
-<nav class="navbar">
-  <div class="nav-logo">
-    <span class="nav-name">RuCoin</span>
-    <span class="nav-badge">PRIVATE</span>
-  </div>
-  <div class="nav-right">
-    <a class="btn-trade" href="https://dapp.quickswap.exchange/swap?type=best&from=0xc2132D05D31c914a87C6611C10748AEb04B58e8F&to=0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575" target="_blank">
-      💱 Купить / Продать
-    </a>
-    <span style="font-size:12px;color:#555;letter-spacing:1px;">POLYGON</span>
-  </div>
-</nav>
+<header class="navbar"><div class="shell nav-inner"><div class="brand"><div class="logo-mark">R</div><div class="brand-text"><div class="brand-name">RuCoin</div><div class="brand-sub">Private Protocol</div></div></div><div class="nav-actions"><button class="nav-link" onclick="showHelpModal()">📖 Инструкция</button><a class="nav-link" href="https://t.me/RuCoin_RUS" target="_blank">Telegram</a></div></div></header>
+<main>
+<section class="hero"><div class="shell hero-grid"><div><div class="eyebrow"><span class="dot"></span> Polygon Network • RUS Token</div><h1>Приватные переводы <span>RuCoin</span></h1><p>Покупайте, продавайте и переводите RUS в сети Polygon. Подключение через MetaMask или Trust Wallet, адрес контракта открыт для проверки.</p><div class="hero-actions"><a class="btn btn-primary" href="https://dapp.quickswap.exchange/swap?type=best&from=0xc2132D05D31c914a87C6611C10748AEb04B58e8F&to=0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575" target="_blank">💱 Купить / Продать</a><button class="btn" onclick="addTokenToWallet()">＋ Добавить RUS</button><a class="btn btn-gold" href="https://polygonscan.com/token/0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575" target="_blank">🔍 PolygonScan</a></div><div class="stats"><div class="stat"><b>Polygon</b><span>сеть</span></div><div class="stat"><b>1%</b><span>комиссия</span></div><div class="stat"><b>RUS</b><span>токен</span></div></div></div><div class="terminal"><div class="terminal-top"><span>RuCoin Terminal</span><span class="live">● Online</span></div><div class="terminal-body"><div class="card"><div class="card-header"><span class="card-header-title">Кошелёк</span><span class="card-header-badge">Web3</span></div><div class="card-body"><button class="btn-metamask" id="connectBtn" onclick="showWalletModal()">🔗 Подключить кошелёк</button><div class="wallet-info" id="walletInfo"></div></div></div><div class="card"><div class="card-header"><span class="card-header-title">Перевод</span><span class="card-header-badge">🔒 Private</span></div><div class="card-body"><div id="formPlaceholder" style="text-align:center;padding:20px;color:#68766e;font-size:13px">Подключите кошелёк для начала работы</div><div class="form" id="form"><div class="field"><label class="field-label">Сумма (RUS)</label><div class="amounts-grid" id="amounts"><div style="text-align:center;padding:20px;color:#728077;font-size:12px;grid-column:1/-1"><span class="loading-dot"></span><span class="loading-dot"></span><span class="loading-dot"></span></div></div></div><div class="field"><label class="field-label">Адрес получателя</label><input type="text" id="recipient" placeholder="0x..."/><div class="warning-box"><strong>⚠️ Важно!</strong> Адрес должен поддерживать сеть <strong>Polygon</strong>. Не отправляйте на биржевые адреса без поддержки токена RUS.</div></div><div class="card" style="margin-bottom:18px"><div class="card-body" style="padding:14px"><div class="info-row"><span class="info-row-label">Протокол</span><span class="info-row-value">ECDH + AES-256-GCM</span></div><div class="info-row"><span class="info-row-label">Комиссия</span><span class="info-row-value">1% от суммы</span></div><div class="info-row"><span class="info-row-label">Сеть</span><span class="info-row-value">Polygon</span></div></div></div><button class="btn-send" id="sendBtn" onclick="sendPayment()">🔒 Отправить</button><div class="success" id="successBox"><div class="success-icon">✓</div><h3>Транзакция принята</h3><p>Средства будут обработаны протоколом.</p><span class="tx-link" id="txHash"></span></div></div><div class="status" id="status"></div></div></div><div class="token-card"><span class="token-address">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span><button class="mini-btn" onclick="copyTokenAddress(this)">Copy</button></div></div></div></div></section>
 
-<div class="main">
-  <div class="page-title">
-    <h1>Приватные <span>переводы</span></h1>
-    <p>E2E Encryption • Polygon Network</p>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <span class="card-header-title">Кошелёк</span>
-      <span class="card-header-badge">Web3</span>
-    </div>
-    <div class="card-body">
-      <button class="btn-metamask" id="connectBtn" onclick="connectWallet()">
-        🔗 Подключить кошелёк
-      </button>
-      <div class="wallet-info" id="walletInfo"></div>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="card-header">
-      <span class="card-header-title">Перевод</span>
-      <span class="card-header-badge">🔒 Анонимно</span>
-    </div>
-    <div class="card-body">
-      <div id="formPlaceholder" style="text-align:center;padding:20px;color:#444;font-size:13px">
-        Подключите кошелёк для начала работы
-      </div>
-      <div class="form" id="form">
-        <div class="field">
-          <label class="field-label">Сумма (RUS)</label>
-          <div class="amounts-grid" id="amounts">
-            <div style="text-align:center;padding:20px;color:#555;font-size:12px;grid-column:span 3">
-              <span class="loading-dot"></span>
-              <span class="loading-dot"></span>
-              <span class="loading-dot"></span>
-            </div>
-          </div>
-        </div>
-
-        <div class="field">
-          <label class="field-label">Адрес получателя</label>
-          <input type="text" id="recipient" placeholder="0x..."/>
-          <div class="warning-box">
-            <strong>⚠️ Важно!</strong>
-            Убедитесь что адрес поддерживает сеть <strong>Polygon (MATIC)</strong>.
-            Не отправляйте на биржевые адреса без поддержки токена RUS —
-            средства могут быть потеряны!
-          </div>
-        </div>
-
-        <div class="card" style="margin-bottom:20px">
-          <div class="card-body" style="padding:16px">
-            <div class="info-row">
-              <span class="info-row-label">Протокол</span>
-              <span class="info-row-value">ECDH + AES-256-GCM</span>
-            </div>
-            <div class="info-row">
-              <span class="info-row-label">Комиссия</span>
-              <span class="info-row-value">1% от суммы</span>
-            </div>
-            <div class="info-row">
-              <span class="info-row-label">Время обработки</span>
-              <span class="info-row-value">~30 секунд</span>
-            </div>
-          </div>
-        </div>
-
-        <button class="btn-send" id="sendBtn" onclick="sendPayment()">
-          🔒 Отправить анонимно
-        </button>
-
-        <div class="success" id="successBox">
-          <div class="success-icon">✓</div>
-          <h3>Транзакция принята</h3>
-          <p>Средства поступят получателю через анонимный маршрут в течение 30 секунд.</p>
-          <span class="tx-link" id="txHash"></span>
-        </div>
-      </div>
-      <div class="status" id="status"></div>
-    </div>
-  </div>
-
-  <div class="card" style="margin-bottom:16px"><div class="card-header"><span class="card-header-title">Адрес токена RuCoin</span><span class="card-header-badge">Polygon</span></div><div class="card-body"><div style="display:flex;align-items:center;gap:8px;background:#1a1a1a;border:1px solid #333;border-radius:8px;padding:12px 16px"><span style="font-family:monospace;font-size:11px;color:#26a17b;flex:1;word-break:break-all">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span><button onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓';setTimeout(()=>this.textContent='Copy',2000)" style="background:#26a17b;border:none;border-radius:6px;color:white;padding:6px 12px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap">Copy</button></div></div></div><div class="info-cards">
-    <div class="info-card">
-      <div class="info-card-icon">🔐</div>
-      <div class="info-card-title">Анонимно</div>
-      <div class="info-card-desc">ECDH шифрование скрывает получателя</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-icon">⚡</div>
-      <div class="info-card-title">Быстро</div>
-      <div class="info-card-desc">Транзакция за ~30 секунд</div>
-    </div>
-    <div class="info-card">
-      <div class="info-card-icon">🛡️</div>
-      <div class="info-card-title">Безопасно</div>
-      <div class="info-card-desc">Смарт-контракты Polygon</div>
-    </div>
-  </div>
+<section class="trust-section">
+<div class="shell">
+<div class="trust-grid trust-grid-mobile3">
+<div class="trust-card"><div class="trust-icon">🔒</div><h3>Анонимно</h3><p>ECDH шифрование скрывает получателя.</p></div>
+<div class="trust-card"><div class="trust-icon">⚡</div><h3>Быстро</h3><p>Транзакция выполняется примерно за 30 секунд.</p></div>
+<div class="trust-card"><div class="trust-icon">🛡️</div><h3>Безопасно</h3><p>Смарт‑контракты работают в сети Polygon.</p></div>
 </div>
+</div>
+</section>
 
-<footer>RuCoin Protocol <span>•</span> Polygon Network <span>•</span> 2026</footer>
-
+</main>
+<div id="wallet-modal" class="modal"><div class="modal-box"><div class="modal-title">Выберите кошелёк</div><button class="wm-btn" onclick="selectMetaMask()">🦊 MetaMask</button><button class="wm-btn" onclick="selectTrustWallet()">🔵 Trust Wallet</button><button class="wm-close" onclick="closeWalletModal()">Отмена</button></div></div>
+<div id="help-modal" class="modal"><div class="modal-box"><div class="hm-title">📖 Инструкция</div>
+  <div class="hm-section"><div class="hm-section-title">Что нужно перед покупкой</div>
+    <div class="hm-step"><div class="hm-step-num">✓</div><div class="hm-step-text">Кошелёк <strong>MetaMask</strong> или <strong>Trust Wallet</strong></div></div>
+    <div class="hm-step"><div class="hm-step-num">✓</div><div class="hm-step-text">Сеть <strong>Polygon</strong> — сайт сам попросит переключить сеть при подключении</div></div>
+    <div class="hm-step"><div class="hm-step-num">✓</div><div class="hm-step-text">Небольшое количество <strong>POL</strong> для оплаты газа</div></div>
+  </div>
+  <div class="hm-section"><div class="hm-section-title">Купить или продать RuCoin</div>
+    <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Нажмите кнопку <strong>«Купить / Продать»</strong> — откроется QuickSwap уже с парой <strong>USDT ↔ RUS</strong></div></div>
+    <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Проверьте, что сверху выбран <strong>USDT Polygon</strong>, а снизу <strong>RuCoin (RUS)</strong></div></div>
+    <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Подтвердите обмен в кошельке</div></div>
+  </div>
+  <div class="hm-section"><div class="hm-section-title">Добавить RUS в кошелёк</div>
+    <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">После покупки нажмите <strong>«Добавить RUS»</strong> на сайте</div></div>
+    <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Кошелёк покажет окно добавления токена — подтвердите добавление</div></div>
+    <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Если кошелёк не поддержал авто-добавление, скопируйте адрес токена вручную:<span class="hm-addr" onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓ Скопировано';setTimeout(()=>this.textContent='0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575',1800)">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span></div></div>
+  </div>
+  <div class="hm-section"><div class="hm-section-title">Отправить RUS</div>
+    <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Нажмите <strong>«Подключить кошелёк»</strong></div></div>
+    <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Выберите сумму и введите адрес получателя</div></div>
+    <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Подтвердите разрешение и отправку в кошельке</div></div>
+  </div>
+  <div class="hm-warning"><strong>Важно:</strong> терминал работает только в сети <strong>Polygon</strong>. Не отправляйте RUS на биржевые адреса, если биржа не поддерживает этот токен в сети Polygon.</div>
+  <button class="hm-close" onclick="closeHelpModal()">Понятно</button>
+</div></div>
+<footer><div class="shell">RuCoin Protocol • Polygon Network • 2026</div></footer>
 <script>
 const POOL1_ADDRESS = "0xda3b99F97f64eA013814b3FC19BC9ce27AC1A549";
 const RUS_ADDRESS = "0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575";
@@ -497,121 +272,63 @@ async function sendPayment() {
 }
 
 function setStatus(msg) { document.getElementById('status').textContent = msg; }
-</script>
-<style>
-#wallet-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; justify-content:center; align-items:center; }
-#wallet-modal.show { display:flex; }
-.wm-box { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:16px; padding:24px; width:280px; }
-.wm-title { font-size:16px; font-weight:700; margin-bottom:16px; text-align:center; color:#fff; }
-.wm-btn { width:100%; padding:14px 16px; margin-bottom:10px; border:1px solid #333; border-radius:10px; background:#141414; color:#fff; font-size:14px; cursor:pointer; text-align:left; display:flex; align-items:center; gap:12px; font-family:inherit; }
-.wm-btn:hover { border-color:#26a17b; }
-.wm-close { width:100%; padding:10px; border:none; border-radius:8px; background:#2a2a2a; color:#888; font-size:13px; cursor:pointer; font-family:inherit; }
-</style>
-<div id="wallet-modal">
-  <div class="wm-box">
-    <div class="wm-title">Выберите кошелёк</div>
-    <button class="wm-btn" onclick="selectMetaMask()">🦊 MetaMask</button>
-    <button class="wm-btn" onclick="selectTrustWallet()">🔵 Trust Wallet</button>
-    <button class="wm-close" onclick="document.getElementById('wallet-modal').classList.remove('show')">Отмена</button>
-  </div>
-</div>
-<script>
-function selectMetaMask() {
-  document.getElementById('wallet-modal').classList.remove('show');
-  connectWallet('metamask');
+
+
+function showWalletModal() { document.getElementById('wallet-modal').classList.add('show'); }
+function closeWalletModal() { document.getElementById('wallet-modal').classList.remove('show'); }
+function selectMetaMask() { closeWalletModal(); connectWallet('metamask'); }
+function selectTrustWallet() { closeWalletModal(); connectWallet('trust'); }
+function showHelpModal() { document.getElementById('help-modal').classList.add('show'); }
+function closeHelpModal() { document.getElementById('help-modal').classList.remove('show'); }
+function copyTokenAddress(btn) {
+  navigator.clipboard.writeText(RUS_ADDRESS);
+  const old = btn.textContent;
+  btn.textContent = '✓ Скопировано';
+  setTimeout(() => btn.textContent = old, 1800);
 }
-function selectTrustWallet() {
-  document.getElementById('wallet-modal').classList.remove('show');
-  connectWallet('trust');
+async function addTokenToWallet() {
+  const eth = window.ethereum;
+  if (!eth) {
+    alert('Откройте сайт внутри MetaMask или Trust Wallet, затем нажмите «Добавить RUS» ещё раз.');
+    showWalletModal();
+    return;
+  }
+  try {
+    const chainId = await eth.request({ method: 'eth_chainId' });
+    if (chainId !== POLYGON_CHAIN_ID) {
+      try {
+        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_CHAIN_ID }] });
+      } catch (switchError) {
+        await eth.request({ method: 'wallet_addEthereumChain', params: [{
+          chainId: POLYGON_CHAIN_ID,
+          chainName: 'Polygon Mainnet',
+          nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+          rpcUrls: ['https://polygon-rpc.com'],
+          blockExplorerUrls: ['https://polygonscan.com']
+        }] });
+      }
+    }
+    const wasAdded = await eth.request({
+      method: 'wallet_watchAsset',
+      params: {
+        type: 'ERC20',
+        options: {
+          address: RUS_ADDRESS,
+          symbol: 'RUS',
+          decimals: 18,
+          image: 'https://rucoinofficial.github.io/rucoin/logo.png'
+        }
+      }
+    });
+    if (wasAdded) alert('RuCoin (RUS) добавлен в кошелёк.');
+  } catch (e) {
+    navigator.clipboard?.writeText(RUS_ADDRESS);
+    alert('Кошелёк не смог добавить токен автоматически. Адрес RUS скопирован — добавьте токен вручную в сети Polygon.');
+  }
 }
-document.getElementById('connectBtn').onclick = function() {
-  document.getElementById('wallet-modal').classList.add('show');
-};
-</script>
-<style>
-#help-modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:9999; justify-content:center; align-items:flex-start; overflow-y:auto; padding:20px 0; }
-#help-modal.show { display:flex; }
-.hm-box { background:#141414; border:1px solid #2a2a2a; border-radius:16px; padding:24px; width:90%; max-width:480px; margin:auto; }
-.hm-title { font-size:18px; font-weight:700; color:#26a17b; margin-bottom:20px; text-align:center; }
-.hm-section { margin-bottom:20px; }
-.hm-section-title { font-size:13px; font-weight:700; color:#26a17b; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid #2a2a2a; }
-.hm-step { display:flex; gap:12px; margin-bottom:10px; align-items:flex-start; }
-.hm-step-num { background:#26a17b; color:white; width:24px; height:24px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; flex-shrink:0; margin-top:1px; }
-.hm-step-text { font-size:13px; color:#ccc; line-height:1.6; }
-.hm-step-text strong { color:#fff; }
-.hm-addr { font-family:monospace; font-size:11px; color:#26a17b; background:#1a1a1a; padding:8px 10px; border-radius:6px; word-break:break-all; margin-top:6px; display:block; cursor:pointer; border:1px solid #333; }
-.hm-warning { background:rgba(255,165,0,0.08); border:1px solid rgba(255,165,0,0.3); border-radius:8px; padding:12px; font-size:12px; color:#ffa500; line-height:1.6; margin-bottom:16px; }
-.hm-close { width:100%; padding:12px; border:none; border-radius:8px; background:#26a17b; color:white; font-size:14px; font-weight:600; cursor:pointer; font-family:inherit; margin-top:4px; }
-</style>
 
-<div id="help-modal">
-  <div class="hm-box">
-    <div class="hm-title">📖 Инструкция</div>
-
-    <div class="hm-section">
-      <div class="hm-section-title">Что нужно для работы</div>
-      <div class="hm-step">
-        <div class="hm-step-num">✓</div>
-        <div class="hm-step-text">Кошелёк <strong>MetaMask</strong> или <strong>Trust Wallet</strong> с сетью Polygon</div>
-      </div>
-      <div class="hm-step">
-        <div class="hm-step-num">✓</div>
-        <div class="hm-step-text">Токен <strong>RuCoin (RUS)</strong> на кошельке</div>
-      </div>
-      <div class="hm-step">
-        <div class="hm-step-num">✓</div>
-        <div class="hm-step-text">Небольшое количество <strong>POL</strong> для оплаты газа (~0.1 POL)</div>
-      </div>
-    </div>
-
-    <div class="hm-section">
-      <div class="hm-section-title">Шаг 1 — Купить RuCoin</div>
-      <div class="hm-step">
-        <div class="hm-step-num">1</div>
-        <div class="hm-step-text">Нажми кнопку <strong>"Купить / Продать"</strong> вверху страницы — откроется QuickSwap</div>
-      </div>
-      <div class="hm-step">
-        <div class="hm-step-num">2</div>
-        <div class="hm-step-text">Или зайди на <strong>quickswap.exchange</strong> и вставь адрес токена вручную:
-          <span class="hm-addr" onclick="navigator.clipboard.writeText('0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575');this.textContent='✓ Скопировано!';setTimeout(()=>this.textContent='0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575',2000)">0x4d870Ae52e61d4FB6e125f4380cC0c0F9f15A575</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="hm-section">
-      <div class="hm-section-title">Шаг 2 — Добавить RuCoin в MetaMask</div>
-      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Открой MetaMask → выбери сеть <strong>Polygon</strong></div></div>
-      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Нажми <strong>"Импорт токенов"</strong> внизу</div></div>
-      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Вставь адрес токена — MetaMask заполнит остальное автоматически</div></div>
-      <div class="hm-step"><div class="hm-step-num">4</div><div class="hm-step-text">Нажми <strong>"Импортировать"</strong></div></div>
-    </div>
-
-    <div class="hm-section">
-      <div class="hm-section-title">Шаг 3 — Добавить RuCoin в Trust Wallet</div>
-      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Открой Trust Wallet → нажми <strong>"+"</strong> вверху справа</div></div>
-      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">В строке поиска вставь адрес токена</div></div>
-      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Найди <strong>RuCoin (RUS)</strong> в сети Polygon и включи его</div></div>
-    </div>
-
-    <div class="hm-section">
-      <div class="hm-section-title">Шаг 4 — Отправить анонимно</div>
-      <div class="hm-step"><div class="hm-step-num">1</div><div class="hm-step-text">Нажми <strong>"Подключить кошелёк"</strong></div></div>
-      <div class="hm-step"><div class="hm-step-num">2</div><div class="hm-step-text">Выбери сумму перевода</div></div>
-      <div class="hm-step"><div class="hm-step-num">3</div><div class="hm-step-text">Введи адрес получателя (только Polygon!)</div></div>
-      <div class="hm-step"><div class="hm-step-num">4</div><div class="hm-step-text">Нажми <strong>"Отправить анонимно"</strong> и подтверди в кошельке</div></div>
-      <div class="hm-step"><div class="hm-step-num">5</div><div class="hm-step-text">Получатель получит средства через <strong>~30 секунд</strong></div></div>
-    </div>
-
-    <div class="hm-warning">
-      ⚠️ <strong>Важно:</strong> Терминал работает только в сети <strong>Polygon</strong>. Не отправляйте на биржевые адреса без поддержки токена RUS. Комиссия сервиса составляет <strong>1%</strong> от суммы перевода.
-    </div>
-
-    <button class="hm-close" onclick="document.getElementById('help-modal').classList.remove('show')">Понятно!</button>
-  </div>
-</div>
-
-<script>
-document.querySelector('.nav-right').insertAdjacentHTML('afterbegin', '<button onclick="document.getElementById(\'help-modal\').classList.add(\'show\')" style="background:rgba(38,161,123,0.15);border:1px solid rgba(38,161,123,0.3);color:#26a17b;font-size:12px;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:600;margin-right:8px;">📖 Инструкция</button>');
 </script>
 </body>
 </html>
+
+
