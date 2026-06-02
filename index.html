@@ -287,27 +287,41 @@ function copyTokenAddress(btn) {
   setTimeout(() => btn.textContent = old, 1800);
 }
 async function addTokenToWallet() {
-  const eth = window.ethereum;
+  const eth = getInjectedProvider() || window.ethereum;
+
   if (!eth) {
     alert('Откройте сайт внутри MetaMask или Trust Wallet, затем нажмите «Добавить RUS» ещё раз.');
     showWalletModal();
     return;
   }
+
   try {
     const chainId = await eth.request({ method: 'eth_chainId' });
+
     if (chainId !== POLYGON_CHAIN_ID) {
       try {
-        await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: POLYGON_CHAIN_ID }] });
+        await eth.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: POLYGON_CHAIN_ID }]
+        });
       } catch (switchError) {
-        await eth.request({ method: 'wallet_addEthereumChain', params: [{
-          chainId: POLYGON_CHAIN_ID,
-          chainName: 'Polygon Mainnet',
-          nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
-          rpcUrls: ['https://polygon-rpc.com'],
-          blockExplorerUrls: ['https://polygonscan.com']
-        }] });
+        if (switchError.code === 4902 || String(switchError.message || '').includes('4902')) {
+          await eth.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: POLYGON_CHAIN_ID,
+              chainName: 'Polygon Mainnet',
+              nativeCurrency: { name: 'POL', symbol: 'POL', decimals: 18 },
+              rpcUrls: ['https://polygon-rpc.com'],
+              blockExplorerUrls: ['https://polygonscan.com']
+            }]
+          });
+        } else {
+          throw switchError;
+        }
       }
     }
+
     const wasAdded = await eth.request({
       method: 'wallet_watchAsset',
       params: {
@@ -315,15 +329,20 @@ async function addTokenToWallet() {
         options: {
           address: RUS_ADDRESS,
           symbol: 'RUS',
-          decimals: 18,
-          image: 'https://rucoinofficial.github.io/rucoin/logo.png'
+          decimals: 18
         }
       }
     });
-    if (wasAdded) alert('RuCoin (RUS) добавлен в кошелёк.');
+
+    if (wasAdded) {
+      alert('RuCoin (RUS) добавлен в кошелёк.');
+    } else {
+      await navigator.clipboard?.writeText(RUS_ADDRESS);
+      alert('Кошелёк не подтвердил добавление. Адрес RUS скопирован — проверьте, возможно токен уже есть в кошельке.');
+    }
   } catch (e) {
-    navigator.clipboard?.writeText(RUS_ADDRESS);
-    alert('Кошелёк не смог добавить токен автоматически. Адрес RUS скопирован — добавьте токен вручную в сети Polygon.');
+    await navigator.clipboard?.writeText(RUS_ADDRESS);
+    alert('Этот кошелёк/браузер не поддержал авто-добавление токена. Адрес RUS скопирован — добавьте токен вручную в сети Polygon.');
   }
 }
 
